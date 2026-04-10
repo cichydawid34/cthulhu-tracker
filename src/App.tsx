@@ -147,7 +147,7 @@ function App() {
     if (!session && !isLoading) {
        return <LoginScreen />;
     }
-    return <FullCharacterSheet charId={sheetCharId} />
+    return <FullCharacterSheet charId={sheetCharId} session={session} role={role} />
   }
 
   if (isLoading) return <div className="min-h-screen bg-[#dfd3c3] flex items-center justify-center p-4"><span className="special-font font-bold text-3xl animate-pulse">Łączenie z Bazą Danych...</span></div>;
@@ -240,7 +240,7 @@ function App() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {characters.map((char) => (
-                <CharacterCard key={char.id} character={char} onEdit={handleEditCharacter} onDelete={handleDeleteCharacter} isAdmin={role === 'admin'} />
+                <CharacterCard key={char.id} character={char} onEdit={handleEditCharacter} onDelete={handleDeleteCharacter} isAdmin={role === 'admin'} isOwner={session?.user?.id === char.user_id} />
               ))}
             </div>
           )

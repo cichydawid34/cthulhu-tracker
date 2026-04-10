@@ -1,11 +1,50 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Character } from "../types";
 import { Brain, Heart, Dices } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
-export function FullCharacterSheet({ charId }: { charId: string }) {
+export function FullCharacterSheet({ charId, session, role }: { charId: string, session?: any, role?: string }) {
   const [character, setCharacter] = useState<Character | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 400;
+        const MAX_HEIGHT = 600;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        handleUpdate('avatarUrl', dataUrl);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     const fetchChar = async () => {
@@ -41,6 +80,15 @@ export function FullCharacterSheet({ charId }: { charId: string }) {
 
   const hash = character.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const caseNo = `1924-${1000 + (hash % 8999)}`;
+
+  const canEdit = role === 'admin' || (session?.user?.id && character?.user_id && session.user.id === character.user_id);
+
+  const handleUpdate = async (field: keyof Character, value: any) => {
+    if (!character) return;
+    setCharacter({ ...character, [field]: value });
+    const { error } = await supabase.from('characters').update({ [field]: value }).eq('id', character.id);
+    if (error) console.error("Failed to update character", error);
+  };
 
   return (
     <div className="min-h-screen bg-[#dfd3c3] text-[#2c241b] p-2 md:p-4 font-sans flex items-center justify-center selection:bg-red-800/30 overflow-x-hidden">
@@ -78,13 +126,30 @@ export function FullCharacterSheet({ charId }: { charId: string }) {
           
           {/* Avatar Area */}
           <div className="flex flex-col gap-2 items-center">
-            <div className="w-36 h-48 border-[3px] border-[#2c241b] bg-black/10 flex-shrink-0 flex flex-col items-center justify-center relative overflow-hidden filter sepia-[0.3] contrast-125 p-1 bg-white rotate-[-3deg] shadow-md hover:rotate-0 transition-transform duration-500">
+            <div className="w-36 h-48 border-[3px] border-[#2c241b] bg-black/10 flex-shrink-0 flex flex-col items-center justify-center relative overflow-hidden filter sepia-[0.3] contrast-125 p-1 bg-white rotate-[-3deg] shadow-md hover:rotate-0 transition-transform duration-500 group">
               {character.avatarUrl ? (
                 <img src={character.avatarUrl} alt={character.characterName} className="h-full w-full object-cover grayscale" />
               ) : (
                 <div className="text-center opacity-40">
                   <span className="special-font text-lg font-bold">NO PHOTO</span>
                 </div>
+              )}
+              {canEdit && (
+                 <>
+                   <input 
+                     type="file" 
+                     ref={fileInputRef} 
+                     onChange={handleFileChange} 
+                     accept="image/*" 
+                     className="hidden" 
+                   />
+                   <button 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white cursor-pointer"
+                   >
+                      <span className="text-xs uppercase font-bold tracking-widest bg-black/60 px-2 py-1 rounded-sm border border-white/20 text-center">Dodaj z Dysku</span>
+                   </button>
+                 </>
               )}
             </div>
             <div className="text-center font-bold text-lg special-font rotate-[-3deg]">
@@ -108,12 +173,12 @@ export function FullCharacterSheet({ charId }: { charId: string }) {
 
             <div className="flex-1">
               <h3 className="special-font text-sm uppercase bg-[#2c241b] text-[#ebdabd] px-2 py-0.5 inline-block shadow-sm mb-2 font-bold">2. Vital Statistics</h3>
-              <div className="flex justify-between gap-2 py-3 px-2 sm:px-4 border-[3px] border-double border-[#2c241b]/50 bg-black/5 shadow-[inset_0_0_10px_rgba(0,0,0,0.05)] h-24 items-center">
-                 <VitalBig label="Sanity" icon={<Brain className="w-5 h-5" />} value={character.sanity} color="text-blue-900" />
+              <div className="flex justify-between gap-2 py-3 px-2 sm:px-4 border-[3px] border-double border-[#2c241b]/50 bg-black/5 shadow-[inset_0_0_10px_rgba(0,0,0,0.05)] md:h-24 h-auto min-h-24 items-center">
+                 <VitalBig label="Sanity" icon={<Brain className="w-5 h-5" />} value={character.sanity} color="text-blue-900" onUpdate={canEdit ? (val) => handleUpdate('sanity', val) : undefined} />
                  <div className="w-px h-16 bg-[#2c241b]/20"></div>
-                 <VitalBig label="Health" icon={<Heart className="w-5 h-5" />} value={character.hitPoints} color="text-red-900" />
+                 <VitalBig label="Health" icon={<Heart className="w-5 h-5" />} value={character.hitPoints} color="text-red-900" onUpdate={canEdit ? (val) => handleUpdate('hitPoints', val) : undefined} />
                  <div className="w-px h-16 bg-[#2c241b]/20"></div>
-                 <VitalBig label="Luck" icon={<Dices className="w-5 h-5" />} value={character.luck} color="text-emerald-900" />
+                 <VitalBig label="Luck" icon={<Dices className="w-5 h-5" />} value={character.luck} color="text-emerald-900" onUpdate={canEdit ? (val) => handleUpdate('luck', val) : undefined} />
               </div>
             </div>
           </div>
@@ -198,13 +263,28 @@ function DossierLine({ label, value }: { label: string, value?: string }) {
   )
 }
 
-function VitalBig({ label, value, icon, color }: { label: string, value: string, icon: React.ReactNode, color: string }) {
+function VitalBig({ label, value, icon, color, onUpdate }: { label: string, value: string, icon: React.ReactNode, color: string, onUpdate?: (val: string) => void }) {
+  const handleInc = () => {
+      const num = parseInt(value || "0", 10);
+      if (onUpdate) onUpdate((num + 1).toString());
+  };
+  const handleDec = () => {
+      const num = parseInt(value || "0", 10);
+      if (onUpdate) onUpdate((num - 1).toString());
+  };
+
   return (
-    <div className={`flex flex-col items-center gap-1 ${color} group flex-1`}>
+    <div className={`flex flex-col items-center gap-1 ${color} group flex-1 relative`}>
       <span className="uppercase font-bold tracking-widest text-[10px] flex items-center gap-1">
         {icon} <span className="hidden sm:inline">{label}</span>
       </span>
       <span className="special-font text-4xl font-bold filter group-hover:drop-shadow-lg transition-all">{value || "00"}</span>
+      {onUpdate && (
+          <div className="flex gap-2 mt-1 opacity-20 md:opacity-0 group-hover:opacity-100 transition-opacity md:absolute md:-bottom-7 z-10">
+              <button title="Odejmij" onClick={handleDec} className="bg-black/10 hover:bg-black/20 text-[#2c241b] w-6 h-6 flex items-center justify-center font-bold pb-0.5 rounded-sm border border-black/20">-</button>
+              <button title="Dodaj" onClick={handleInc} className="bg-black/10 hover:bg-black/20 text-[#2c241b] w-6 h-6 flex items-center justify-center font-bold pb-0.5 rounded-sm border border-black/20">+</button>
+          </div>
+      )}
     </div>
   )
 }

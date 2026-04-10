@@ -2,7 +2,7 @@ import { Character } from "../types"
 import { Card } from "./ui/Card"
 import { User, Pencil, Trash, Brain, Heart, Dices, Eye } from "lucide-react"
 
-export function CharacterCard({ character, onEdit, onDelete, isAdmin = true }: { character: Character, onEdit: (char: Character) => void, onDelete: (id: string) => void, isAdmin?: boolean }) {
+export function CharacterCard({ character, onEdit, onDelete, isAdmin = true, isOwner = false }: { character: Character, onEdit: (char: Character) => void, onDelete: (id: string) => void, isAdmin?: boolean, isOwner?: boolean }) {
   // Generate a random case number based on character ID to keep it consistent per character
   const hash = character.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const caseNo = `1924-${1000 + (hash % 8999)}`;
@@ -20,7 +20,7 @@ export function CharacterCard({ character, onEdit, onDelete, isAdmin = true }: {
         </div>
 
         {/* Action Buttons */}
-        {isAdmin && (
+        {(isAdmin || isOwner) && (
         <div className="absolute right-2 top-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-30">
           <button
             onClick={() => window.open(`/?charId=${character.id}`, '_blank')}
@@ -29,20 +29,24 @@ export function CharacterCard({ character, onEdit, onDelete, isAdmin = true }: {
           >
             <Eye className="w-4 h-4" />
           </button>
-          <button
-            onClick={() => onEdit(character)}
-            className="text-[#2c241b] hover:text-primary transition-colors hover:bg-black/5 rounded-full p-1.5 border border-transparent hover:border-[#2c241b]"
-            title="Edytuj akta"
-          >
-            <Pencil className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onDelete(character.id)}
-            className="text-[#2c241b] hover:text-red-800 transition-colors hover:bg-black/5 rounded-full p-1.5 border border-transparent hover:border-[#2c241b]"
-            title="Zamknij sprawę (Usuń)"
-          >
-            <Trash className="w-4 h-4" />
-          </button>
+          {isAdmin && (
+            <>
+              <button
+                onClick={() => onEdit(character)}
+                className="text-[#2c241b] hover:text-primary transition-colors hover:bg-black/5 rounded-full p-1.5 border border-transparent hover:border-[#2c241b]"
+                title="Edytuj akta"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => onDelete(character.id)}
+                className="text-[#2c241b] hover:text-red-800 transition-colors hover:bg-black/5 rounded-full p-1.5 border border-transparent hover:border-[#2c241b]"
+                title="Zamknij sprawę (Usuń)"
+              >
+                <Trash className="w-4 h-4" />
+              </button>
+            </>
+          )}
         </div>
         )}
 
