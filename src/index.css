@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 33% 85%; /* Vintage paper #dfd3c3 */
+    --foreground: 24 20% 15%; /* Dark ink #2c241b */
+
+    --card: 40 33% 88%; 
+    --card-foreground: 24 20% 15%;
+
+    --popover: 40 33% 88%;
+    --popover-foreground: 24 20% 15%;
+
+    --primary: 0 70% 35%; /* Confidential Stamp Red */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 40 20% 75%; 
+    --secondary-foreground: 24 20% 15%;
+
+    --muted: 40 20% 75%;
+    --muted-foreground: 24 15% 35%;
+
+    --accent: 40 20% 75%;
+    --accent-foreground: 24 20% 15%;
+
+    --border: 24 20% 25%; /* Dark borders */
+    --input: 40 20% 75%;
+    --ring: 0 70% 35%;
+
+    --radius: 0.1rem; /* Sharp edges */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Courier Prime', monospace;
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+    background-color: #dfd3c3;
+  }
+  h1, h2, h3, h4, h5, h6, .special-font {
+    font-family: 'Special Elite', cursive;
+  }
+}
+
+@layer utilities {
+  @keyframes dice-shake {
+    0% { transform: translate(1px, 1px) rotate(0deg) scale(1.1); }
+    10% { transform: translate(-1px, -2px) rotate(-3deg) scale(1.15); }
+    20% { transform: translate(-3px, 0px) rotate(3deg) scale(1.1); }
+    30% { transform: translate(3px, 2px) rotate(0deg) scale(1.15); }
+    40% { transform: translate(1px, -1px) rotate(3deg) scale(1.1); }
+    50% { transform: translate(-1px, 2px) rotate(-3deg) scale(1.15); }
+    60% { transform: translate(-3px, 1px) rotate(0deg) scale(1.1); }
+    70% { transform: translate(3px, 1px) rotate(-3deg) scale(1.15); }
+    80% { transform: translate(-1px, -1px) rotate(3deg) scale(1.1); }
+    90% { transform: translate(1px, 2px) rotate(0deg) scale(1.15); }
+    100% { transform: translate(1px, -2px) rotate(-3deg) scale(1.1); }
+  }
+
+  @keyframes dice-impact {
+    0% { transform: scale(1.4); filter: brightness(2) drop-shadow(0 0 30px rgba(153,27,27,0.8)); }
+    50% { transform: scale(0.9); }
+    100% { transform: scale(1); filter: brightness(1) drop-shadow(0 0 0px transparent); }
+  }
+
+  .animate-dice-shake {
+    animation: dice-shake 0.1s linear infinite;
+  }
+
+  .animate-dice-impact {
+    animation: dice-impact 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
+  @keyframes dice-crit-success {
+    0% { transform: scale(1.5); filter: brightness(2) drop-shadow(0 0 40px rgba(234, 179, 8, 1)); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1.05); filter: brightness(1.2) drop-shadow(0 0 20px rgba(234, 179, 8, 0.8)); }
+  }
+
+  @keyframes dice-crit-fail {
+    0% { transform: scale(1.5) rotate(-10deg); filter: brightness(0.5) drop-shadow(0 0 40px rgba(153, 27, 27, 1)); }
+    20% { transform: scale(1.1) rotate(10deg); }
+    40% { transform: scale(1.1) rotate(-10deg); }
+    60% { transform: scale(1.1) rotate(10deg); }
+    80% { transform: scale(1.1) rotate(-10deg); }
+    100% { transform: scale(0.95) rotate(0deg); filter: brightness(0.7) drop-shadow(0 0 20px rgba(153, 27, 27, 0.9)); }
+  }
+
+  .animate-dice-crit-success {
+    animation: dice-crit-success 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
+  .animate-dice-crit-fail {
+    animation: dice-crit-fail 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+}
