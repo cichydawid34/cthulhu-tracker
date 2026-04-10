@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Dices } from "lucide-react";
 
-export function DiceRollerTab() {
+export function DiceRollerTab({ userName = "Badacz" }: { userName?: string }) {
   const [isRolling, setIsRolling] = useState(false);
   const [currentDice, setCurrentDice] = useState<number | null>(null);
   const [displayNumber, setDisplayNumber] = useState<number | string>("?");
-  const [history, setHistory] = useState<{ dice: number, result: number, time: string, crit: string }[]>([]);
+  const [history, setHistory] = useState<{ dice: number, result: number, time: string, crit: string, userName: string }[]>([]);
   const [animationState, setAnimationState] = useState<'idle' | 'rolling' | 'impact' | 'crit'>('idle');
   const [criticalState, setCriticalState] = useState<'none' | 'success' | 'failure'>('none');
 
@@ -49,7 +49,8 @@ export function DiceRollerTab() {
         dice: sides,
         result: finalResult,
         time: new Date().toLocaleTimeString(),
-        crit
+        crit,
+        userName
       }, ...prev].slice(0, 10)); // Keep history of last 10 rolls
 
       setIsRolling(false);
@@ -154,7 +155,7 @@ export function DiceRollerTab() {
             history.map((record, i) => (
               <div key={i} className={`flex justify-between items-center text-sm border-b border-[#2c241b]/10 py-2 ${i === 0 ? 'font-bold bg-black/5 px-2 -mx-2' : ''} ${record.crit === 'success' ? 'text-yellow-700' : record.crit === 'failure' ? 'text-red-700' : ''}`}>
                 <span className="opacity-60 text-xs w-20">{record.time}</span>
-                <span className="flex-1 text-center">Badacz rzucił kością <strong className={`special-font ${record.crit !== 'none' ? 'opacity-100' : 'text-red-900/80'}`}>K{record.dice}</strong></span>
+                <span className="flex-1 text-center font-bold tracking-wider">{record.userName} rzucił kością <strong className={`special-font ${record.crit !== 'none' ? 'opacity-100' : 'text-red-900/80'}`}>K{record.dice}</strong></span>
                 <span className="font-bold special-font text-xl w-16 text-right">
                   {record.crit === 'success' && '★ '}
                   {record.crit === 'failure' && '☠ '}
