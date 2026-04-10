@@ -211,14 +211,12 @@ function App() {
         >
           <div className="flex items-center gap-2"><Skull className="w-4 h-4" /> Akta Badaczy</div>
         </button>
-        {role === 'admin' && (
         <button
           onClick={() => setActiveTab('reference')}
           className={`uppercase font-bold tracking-widest special-font text-sm md:text-lg px-4 md:px-6 py-2 transition-colors border-t-2 border-l-2 border-r-2 whitespace-nowrap ${activeTab === 'reference' ? 'border-[#2c241b] bg-[#e8decd] text-[#2c241b]' : 'border-transparent text-[#2c241b]/60 hover:bg-black/5 hover:text-[#2c241b]'}`}
         >
           <div className="flex items-center gap-2"><FileText className="w-4 h-4" /> Tabele Losowe</div>
         </button>
-        )}
         <button
           onClick={() => setActiveTab('dice')}
           className={`uppercase font-bold tracking-widest special-font text-sm md:text-lg px-4 md:px-6 py-2 transition-colors border-t-2 border-l-2 border-r-2 whitespace-nowrap ${activeTab === 'dice' ? 'border-[#2c241b] bg-[#e8decd] text-[#2c241b]' : 'border-transparent text-[#2c241b]/60 hover:bg-black/5 hover:text-[#2c241b]'}`}
