@@ -132,8 +132,7 @@ function App() {
     
     // Append Raw JSON for potential future imports
     content += "=== RAW SYSTEM DATA ===\n";
-    const charactersWithoutImages = characters.map(({ avatarUrl, ...rest }) => rest);
-    content += JSON.stringify(charactersWithoutImages, null, 2);
+    content += JSON.stringify(characters, null, 2);
 
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
